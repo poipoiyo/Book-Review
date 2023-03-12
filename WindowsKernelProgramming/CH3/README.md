@@ -76,7 +76,7 @@ This can be done with the NT_SUCCESS macro.
 
 https://www.osr.com/wp-content/uploads/NTtoDos.pdf
 
-<img src="https://github.com/poipoiyo/Demo-image/blob/main/Book-Review/WindowsKernelProgramming/CH3/Win32%20error%20mapping.png" width="40%" />
+<img src="https://github.com/poipoiyo/Demo-image/blob/main/Book-Review/WindowsKernelProgramming/CH3/Win32%20error%20mapping.png" width="60%" />
 
 ```C++
 NTSTATUS DoWork() {
@@ -132,7 +132,7 @@ typedef struct _LIST_ENTRY {
 } LIST_ENTRY, *PLIST_ENTRY;
 ```
 
-<img src="https://github.com/poipoiyo/Demo-image/blob/main/Book-Review/WindowsKernelProgramming/CH3/3-2%20Circular%20linked%20list.png" width="40%" />
+<img src="https://github.com/poipoiyo/Demo-image/blob/main/Book-Review/WindowsKernelProgramming/CH3/3-2%20Circular%20linked%20list.png" width="80%" />
 
 ### EPROCESS
 - connected in a circular doubly linked list 
@@ -190,7 +190,7 @@ DriverEntry(
 - Driver installed by Process Explorer creates a single device object so that Process Explorer is able to open device handle.
 - Device object must be named and have a symbolic link in ?? directory
 
-<img src="https://github.com/poipoiyo/Demo-image/blob/main/Book-Review/WindowsKernelProgramming/CH3/3-4%20Process%20Explorer%E2%80%99s%20symbolic%20link%20in%20WinObj.png" width="40%" />
+<img src="https://github.com/poipoiyo/Demo-image/blob/main/Book-Review/WindowsKernelProgramming/CH3/3-4%20Process%20Explorer%E2%80%99s%20symbolic%20link%20in%20WinObj.png" width="80%" />
 
 Open a handle to its device:
 ```C+++
@@ -205,7 +205,7 @@ IoCreateDevice: allocates and initializes device object and returns its pointer.
 Device object instance is stored `DRIVER_OBJECT`
 Driver and multi devices:
 
-<img src="https://github.com/poipoiyo/Demo-image/blob/main/Book-Review/WindowsKernelProgramming/CH3/3-5%20Driver%20and%20Device%20objects.png" width="40%" />
+<img src="https://github.com/poipoiyo/Demo-image/blob/main/Book-Review/WindowsKernelProgramming/CH3/3-5%20Driver%20and%20Device%20objects.png" width="80%" />
 
 
 
