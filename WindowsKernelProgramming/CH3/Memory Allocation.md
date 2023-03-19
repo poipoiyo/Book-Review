@@ -2,7 +2,7 @@
 ## Dynamic Memory Allocation
 
 Example shows memory allocation and string copying to save the registry path
-passed to DriverEntry, and freeing that string in the Unload routine
+passed to `DriverEntry`, and freeing that string in the Unload routine
 
 ```C++
 #define DRIVER_TAG 'dcba'

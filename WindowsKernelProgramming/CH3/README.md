@@ -101,7 +101,7 @@ typedef struct _UNICODE_STRING {
 } UNICODE_STRING;
 ```
 
-Common UNICODE_STRING functions: `RtlInitUnicodeString`, `RtlCopyUnicodeString `, `RtlCompareUnicodeString`, `RtlEqualUnicodeString`, `RtlAppendUnicodeStringToString`
+Common UNICODE_STRING functions: `RtlInitUnicodeString`, `RtlCopyUnicodeString`, `RtlCompareUnicodeString`, `RtlEqualUnicodeString`, `RtlAppendUnicodeStringToString`
 
 Some well-known string functions: `wcscpy`, `wcscat`, `wcslen`, `wcscpy_s`, `wcschr`, `strcpy`, `strcpy_s`
 
@@ -118,9 +118,11 @@ Page: is a fixed-length contiguous block of virtual memory, described by a singl
 
 Non-paged pool is a “better” memory pool as it can never incur a page fault.
 
-Useful functions: `ExAllocatePool `, `ExAllocatePoolWithTag`, `ExAllocatePoolWithQuotaTag`, `ExFreePool`
+Useful functions: `ExAllocatePool`, `ExAllocatePoolWithTag`, `ExAllocatePoolWithQuotaTag`, `ExFreePool`
 
-View pool allocations: Poolmon WDK tool
+View pool allocations: [Poolmon WDK tool](https://learn.microsoft.com/en-us/windows-hardware/drivers/devtest/poolmon)
+
+Example: [Dynamic Memory Allocation](https://github.com/poipoiyo/Book-Review/blob/main/WindowsKernelProgramming/CH3/Memory%20Allocation.md)
 
 ## Lists
 The kernel uses circular doubly linked lists in many of its internal data structures.
@@ -152,37 +154,57 @@ MyDataItem* GetItem(LIST_ENTRY* pEntry) {
 }
 ```
 
-## The Driver Object
-DriverEntry function accepts two arguments.
+## [Driver Object](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/wdm/ns-wdm-_driver_object)
+- Each driver object represents image of a loaded kernel-mode driver. 
 
+- A pointer to driver object is an input parameter to driver's `DriverEntry`, `AddDevice`, `Reinitialize` `Unload`.
+
+- Semi-documented, is allocated by the kernel and partially initialized. 
+- Semi-documented: some of its members are documented for driver’s use and some are not.
+
+### DriverEntry
 ```C++
 DriverEntry(
   _In_ PDRIVER_OBJECT DriverObject, 
   _In_ PUNICODE_STRING RegistryPath
  )
 ```
-
-- Driver object: Semi-documented, is allocated by the kernel and partially initialized. 
-- Semi-documented: some of its members are documented for driver’s use and some are not.
 - Dispatch Routines: member of `DriverObject` is an array of function pointers, specifies particular operations, such as Create, Read, Write
-- In DriverEntry, only needs to initialize the actual operations it supports, leaving other default.
-- A driver must at least support `IRP_MJ_CREATE`, `IRP_MJ_CLOSE` operations, to allow opening a handle to one the device objects for the driver.
+- In DriverEntry, only needs to initialize actual operations it supports, leaving other default.
+- A driver must at least support `IRP_MJ_CREATE`, `IRP_MJ_CLOSE` operations, to allow opening a handle to device objects for driver.
 
-## Device Object
+## [Device Object](https://learn.microsoft.com/en-us/windows-hardware/drivers/kernel/introduction-to-device-objects)
 - Actual communication endpoints for clients to talk to drivers. 
-- Are instances of the semi-documented DEVICE_OBJECT structure. 
+- Are instances of the semi-documented `DEVICE_OBJECT` structure. 
 - At least one should be created and given a name, so that it may be contacted by clients.
 
-[Introduction to Device Objects](https://learn.microsoft.com/en-us/windows-hardware/drivers/kernel/introduction-to-device-objects)
-
 ### CreateFile
-- First argument “file name”(file object) should point to a device object’s name.
-- Opening a handle to a file or device creates a instance of the kernel structure `FILE_OBJECT`. (Semi-documented)
-- Accepts a symbolic link, a kernel object that knows how to point to another kernel object. (file system shortcut)
-- Symbolic linksare located in Object Manager directory named ?? (check by WinObj)
-- The names in ?? directory are not accessible by user mode, but can be accessed by kernel. (by `IoGetDeviceObjectPointer`)
+```C++
+HANDLE CreateFile(
+  [in]           LPCSTR                lpFileName,
+  [in]           DWORD                 dwDesiredAccess,
+  [in]           DWORD                 dwShareMode,
+  [in, optional] LPSECURITY_ATTRIBUTES lpSecurityAttributes,
+  [in]           DWORD                 dwCreationDisposition,
+  [in]           DWORD                 dwFlagsAndAttributes,
+  [in, optional] HANDLE                hTemplateFile
+);
+```
 
-[FILE_OBJECT](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/wdm/ns-wdm-_file_object)
+- First argument “file name”(file object) should point to a device object’s name.
+- Open handle to file or device creates a instance of kernel structure [FILE_OBJECT](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/wdm/ns-wdm-_file_object). (Semi-documented)
+- Accepts a symbolic link, a kernel object that knows how to point to another kernel object. (file system shortcut)
+- The names in ?? directory are not accessible by user mode, but can be accessed by kernel. (by `IoGetDeviceObjectPointer`)
+### FILE_OBJECT 
+- To user-mode, represents an open instance of a file, device, directory, or volume. 
+- To device and intermediate drivers, represents device object. 
+- To drivers in file system stack, represents a directory or file.
+
+### Symbolic linksare 
+- located in Object Manager directory named ?? (check by [WinObj](https://learn.microsoft.com/en-us/sysinternals/downloads/winobj))
+
+### WinObj 
+- A tool to track down object-related problems, or just curious about Object Manager namespace.
 
 ###  Process Explorer
 - Install a driver after launched with administrator rights.
