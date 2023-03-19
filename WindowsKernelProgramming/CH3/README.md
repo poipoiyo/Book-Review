@@ -101,7 +101,7 @@ typedef struct _UNICODE_STRING {
 } UNICODE_STRING;
 ```
 
-Common UNICODE_STRING functions: `RtlInitUnicodeString `, `RtlCopyUnicodeString `, `RtlCompareUnicodeString`, `RtlEqualUnicodeString`, `RtlAppendUnicodeStringToString`
+Common UNICODE_STRING functions: `RtlInitUnicodeString`, `RtlCopyUnicodeString `, `RtlCompareUnicodeString`, `RtlEqualUnicodeString`, `RtlAppendUnicodeStringToString`
 
 Some well-known string functions: `wcscpy`, `wcscat`, `wcslen`, `wcscpy_s`, `wcschr`, `strcpy`, `strcpy_s`
 
