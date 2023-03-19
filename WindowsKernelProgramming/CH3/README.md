@@ -195,6 +195,8 @@ HANDLE CreateFile(
 - Open handle to file or device creates a instance of kernel structure [FILE_OBJECT](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/wdm/ns-wdm-_file_object). (Semi-documented)
 - Accepts a symbolic link, a kernel object that knows how to point to another kernel object. (file system shortcut)
 - The names in ?? directory are not accessible by user mode, but can be accessed by kernel. (by `IoGetDeviceObjectPointer`)
+<img src="https://github.com/poipoiyo/Demo-image/blob/main/Book-Review/WindowsKernelProgramming/CH3/3-3%20Symbolic%20links%20directory%20in%20WinObj.png" width="80%" />
+
 ### FILE_OBJECT 
 - To user-mode, represents an open instance of a file, device, directory, or volume. 
 - To device and intermediate drivers, represents device object. 
@@ -222,7 +224,7 @@ HANDLE hDevice = CreateFile(L"\\\\.\\PROCEXP152",
 
 Driver creates a device object using `IoCreateDevice` function. 
 
-IoCreateDevice: allocates and initializes device object and returns its pointer. 
+`IoCreateDevice`: allocates and initializes device object and returns its pointer. 
 
 Device object instance is stored `DRIVER_OBJECT`
 Driver and multi devices:
