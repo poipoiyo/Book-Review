@@ -16,6 +16,12 @@ Developing kernel drivers requires the Windows Driver Kit (WDK)
 |Exception Handling|Can use C++ exceptions or SEH|Only SEH can be used|
 |C++ Usage|Full C++ runtime available|No C++ runtime|
 
+### [IRQL](https://en.wikipedia.org/wiki/IRQL_(Windows))
+The interrupt controller sends interrupt request(IRQ) to CPU with a certain priority level, and CPU sets mask that causes any other interrupts with a lower priority to be put into a pending state, until CPU releases control back to interrupt controller.
+
+### [SEH](https://learn.microsoft.com/en-us/cpp/cpp/structured-exception-handling-c-cpp?view=msvc-170)
+Microsoft extension to C and C++ to handle certain exceptional code situations, such as hardware faults
+
 ## Unhandled Exceptions
 user mode: cause the process to terminate prematurely
 
@@ -136,8 +142,8 @@ typedef struct _LIST_ENTRY {
 
 <img src="https://github.com/poipoiyo/Demo-image/blob/main/Book-Review/WindowsKernelProgramming/CH3/3-2%20Circular%20linked%20list.png" width="80%" />
 
-### EPROCESS
-- connected in a circular doubly linked list 
+### [EPROCESS](https://learn.microsoft.com/en-us/windows-hardware/drivers/kernel/eprocess)
+- connected in circular doubly linked list 
 - head: stored the kernel variable  `PsActiveProcessHead`).
 - member: `ActiveProcessLinks` is of type `LIST_ENTRY`, pointing to the next and previous `LIST_ENTRY` objects
 - `CONTAINING_RECORD` macro: to get pointer to actual structure of address of a `LIST_ENTRY`
@@ -224,9 +230,9 @@ HANDLE hDevice = CreateFile(L"\\\\.\\PROCEXP152",
 
 Driver creates a device object using `IoCreateDevice` function. 
 
-`IoCreateDevice`: allocates and initializes device object and returns its pointer. 
+### [IoCreateDevice](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/wdm/nf-wdm-iocreatedevice)
+Creates a device object for use by a driver
 
-Device object instance is stored `DRIVER_OBJECT`
 Driver and multi devices:
 
 <img src="https://github.com/poipoiyo/Demo-image/blob/main/Book-Review/WindowsKernelProgramming/CH3/3-5%20Driver%20and%20Device%20objects.png" width="80%" />
