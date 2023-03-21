@@ -162,9 +162,7 @@ MyDataItem* GetItem(LIST_ENTRY* pEntry) {
 
 ## [Driver Object](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/wdm/ns-wdm-_driver_object)
 - Each driver object represents image of a loaded kernel-mode driver. 
-
 - A pointer to driver object is an input parameter to driver's `DriverEntry`, `AddDevice`, `Reinitialize` `Unload`.
-
 - Semi-documented, is allocated by the kernel and partially initialized. 
 - Semi-documented: some of its members are documented for driver’s use and some are not.
 
@@ -178,6 +176,18 @@ DriverEntry(
 - Dispatch Routines: member of `DriverObject` is an array of function pointers, specifies particular operations, such as Create, Read, Write
 - In DriverEntry, only needs to initialize actual operations it supports, leaving other default.
 - A driver must at least support `IRP_MJ_CREATE`, `IRP_MJ_CLOSE` operations, to allow opening a handle to device objects for driver.
+
+### Major function code
+|Major function| Description|
+| ---- | ---- |
+| IRP_MJ_CREATE (0) | Create operation. Typically invoked for `CreateFile` or `ZwCreateFile` calls |
+| IRP_MJ_CLOSE (2)  | Close operation. Normally invoked for `CloseHandle` or `ZwClose` calls |
+| IRP_MJ_READ (3)  | Read operation. Typically invoked for `ReadFile`, `ZwReadFile` and similar read APIs |
+| IRP_MJ_DEVICE_CONTROL (14) | Generic call to a driver, invoked because of DeviceIoControl or ZwDeviceIoControlFile calls |
+| IRP_MJ_INTERNAL_DEVICE_CONTROL (15) |  Similar to the previous one, but only available for kernel mode callers |
+| IRP_MJ_PNP (31) | Plug and play callback invoked by the Plug and Play Manager. Generally interesting for hardware-based drivers or filters to such drivers |
+| IRP_MJ_POWER (22) | Power callback invoked by the Power Manager. Generally interesting for hardware-based drivers filters to such drivers |
+
 
 ## [Device Object](https://learn.microsoft.com/en-us/windows-hardware/drivers/kernel/introduction-to-device-objects)
 - Actual communication endpoints for clients to talk to drivers. 
@@ -208,7 +218,7 @@ HANDLE CreateFile(
 - To device and intermediate drivers, represents device object. 
 - To drivers in file system stack, represents a directory or file.
 
-### Symbolic linksare 
+### Symbolic links
 - located in Object Manager directory named ?? (check by [WinObj](https://learn.microsoft.com/en-us/sysinternals/downloads/winobj))
 
 ### WinObj 
