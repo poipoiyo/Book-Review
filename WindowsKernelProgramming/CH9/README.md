@@ -808,4 +808,3 @@ void DisplayBinary(const UCHAR* buffer, DWORD size) {
   printf("\n");
 }
 ```
-p240
