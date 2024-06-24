@@ -44,24 +44,6 @@ freed automatically: too dangerous to achieve, might casue system crash
 - `nullptr`
 - `auto`
 
-## Kernel API
-|Prefix|Meaning|
-| ---- | ---- |
-|Ex|general executive functions|
-|Ke|general kernel functions|
-|Mm|memory manager|
-|Rtl|general runtime library|
-|FsRtl|file system runtime library|
-|Flt|file system mini-filter library|
-|Ob|object manager|
-|Io|I/O manager|
-|Se|security|
-|Ps|process structure|
-|Po|power manager|
-|Wmi|Windows management instrumentation|
-|Zw|native API wrappers|
-|Hal|hardware abstraction layer|
-|Cm|configuration manager (registry)|
 
 ## Strings
 most functions dealing with strings expect a structure of type UNICODE_STRING.
