@@ -36,12 +36,6 @@ automatically, only released at the next system boot
 
 freed automatically: too dangerous to achieve, might casue system crash
 
-## C++ Usage
-
-Kernel mode: started supporting C++ with Visual Studio 2012 and WDK 8.
-
-Resource Acquisition Is Initialization (RAII): to make sure don't leak resources.
-
 ### C++ features cannot be used:
 - `new` and `delete`: allocate from a user-mode heap
 - global variables: non-default constructors will not be called, create some Init function instead 
@@ -49,9 +43,6 @@ Resource Acquisition Is Initialization (RAII): to make sure don't leak resources
 - standard C++ libraries: but C++ templates are fine
 - `nullptr`
 - `auto`
-
-## Debug and Release Builds
-Debug build uses no optimizations by default, but easier to debug.
 
 ## Kernel API
 |Prefix|Meaning|
@@ -72,28 +63,6 @@ Debug build uses no optimizations by default, but easier to debug.
 |Hal|hardware abstraction layer|
 |Cm|configuration manager (registry)|
 
-## Functions and Error Codes
-Return `NTSTATUS` as operation success or failure.
-
-Most code paths don’t care about the exact nature of the error, and so testing the most significant bit
-is enough. 
-
-This can be done with the NT_SUCCESS macro. 
-
-https://www.osr.com/wp-content/uploads/NTtoDos.pdf
-
-<img src="https://github.com/poipoiyo/Demo-image/blob/main/Book-Review/WindowsKernelProgramming/CH3/Win32%20error%20mapping.png" width="60%" />
-
-```C++
-NTSTATUS DoWork() {
-  NTSTATUS status = CallSomeKernelFunction();
-  if(!NT_SUCCESS(Statue)) {
-    KdPirnt((L"Error occurred: 0x%08X\n", status));
-    return status;
-  return STATUS_SUCCESS;
-}
-```
-
 ## Strings
 most functions dealing with strings expect a structure of type UNICODE_STRING.
 
@@ -107,10 +76,6 @@ typedef struct _UNICODE_STRING {
 } UNICODE_STRING;
 ```
 
-Common UNICODE_STRING functions: `RtlInitUnicodeString`, `RtlCopyUnicodeString`, `RtlCompareUnicodeString`, `RtlEqualUnicodeString`, `RtlAppendUnicodeStringToString`
-
-Some well-known string functions: `wcscpy`, `wcscat`, `wcslen`, `wcscpy_s`, `wcschr`, `strcpy`, `strcpy_s`
-
 ## Dynamic Memory Allocation
 Drivers often need to allocate memory dynamically.
 
@@ -123,10 +88,6 @@ The kernel provides two general memory pools for drivers to use.
 Page: is a fixed-length contiguous block of virtual memory, described by a single entry in the page table.
 
 Non-paged pool is a “better” memory pool as it can never incur a page fault.
-
-Useful functions: `ExAllocatePool`, `ExAllocatePoolWithTag`, `ExAllocatePoolWithQuotaTag`, `ExFreePool`
-
-View pool allocations: [Poolmon WDK tool](https://learn.microsoft.com/en-us/windows-hardware/drivers/devtest/poolmon)
 
 Example: [Dynamic Memory Allocation](https://github.com/poipoiyo/Book-Review/blob/main/WindowsKernelProgramming/CH3/Memory%20Allocation.md)
 
@@ -194,25 +155,6 @@ DriverEntry(
 - Are instances of the semi-documented `DEVICE_OBJECT` structure. 
 - At least one should be created and given a name, so that it may be contacted by clients.
 
-### CreateFile
-```C++
-HANDLE CreateFile(
-  [in]           LPCSTR                lpFileName,
-  [in]           DWORD                 dwDesiredAccess,
-  [in]           DWORD                 dwShareMode,
-  [in, optional] LPSECURITY_ATTRIBUTES lpSecurityAttributes,
-  [in]           DWORD                 dwCreationDisposition,
-  [in]           DWORD                 dwFlagsAndAttributes,
-  [in, optional] HANDLE                hTemplateFile
-);
-```
-
-- First argument “file name”(file object) should point to a device object’s name.
-- Open handle to file or device creates a instance of kernel structure [FILE_OBJECT](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/wdm/ns-wdm-_file_object). (Semi-documented)
-- Accepts a symbolic link, a kernel object that knows how to point to another kernel object. (file system shortcut)
-- The names in ?? directory are not accessible by user mode, but can be accessed by kernel. (by `IoGetDeviceObjectPointer`)
-<img src="https://github.com/poipoiyo/Demo-image/blob/main/Book-Review/WindowsKernelProgramming/CH3/3-3%20Symbolic%20links%20directory%20in%20WinObj.png" width="80%" />
-
 ### FILE_OBJECT 
 - To user-mode, represents an open instance of a file, device, directory, or volume. 
 - To device and intermediate drivers, represents device object. 
@@ -221,8 +163,6 @@ HANDLE CreateFile(
 ### Symbolic links
 - located in Object Manager directory named ?? (check by [WinObj](https://learn.microsoft.com/en-us/sysinternals/downloads/winobj))
 
-### WinObj 
-- A tool to track down object-related problems, or just curious about Object Manager namespace.
 
 ###  Process Explorer
 - Install a driver after launched with administrator rights.
