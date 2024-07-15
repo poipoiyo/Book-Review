@@ -1,4 +1,4 @@
-# Chapter 7: The I/O Request Packet+
+# Chapter 7: The I/O Request Packet
 After a typical driver completes its initialization in `DriverEntry`, its primary job is to handle requests. 
 
 These requests are packaged as the semi-documented I/O Request Packet (IRP) structure.
@@ -24,8 +24,7 @@ The I/O system in Windows is device-centric, rather than driver-centric.
 
 <img src="https://github.com/poipoiyo/Demo-image/blob/main/Book-Review/WindowsKernelProgramming/CH7/7-2%20Layered%20devices.png" width="80%" />  
 
-Different device object that comprise device node (devnode) layers are named according to
-their role in devnode. 
+Different device object that comprise device node (devnode) layers are named according to their role in devnode. 
 
 ### Rundown of meaning
 - PDO (Physical Device Object): created by bus driver that is in charge of the particular bus (PCI, USB, ...). Represents the fact that there is some device on that bus.
@@ -34,15 +33,14 @@ intimately.
 - FiDO (Filter Device Object): optional filter devices created by filter drivers
 
 ### PnP manager
-- In this case, responsible for loading appropriate drivers,
-starting from the bottom. 
+- In this case, responsible for loading appropriate drivers, starting from the bottom. 
 - Suppose the devnode in figure represents a set of drivers that manage a PCI network card. 
 
 Events to devnode creation:
 1. PCI bus driver (pci.sys) creates a PDO (`IoCreateDevice`). The bus driver has no idea whether this a network card, video card or something else, only knows there is something there and can extract basic information from its controller, such as Vendor ID, Device ID 
 2. PCI bus driver notifies P&P manager that it has changes on its bus.
 3. P&P manager requests a list of PDOs managed by bus driver. It receives back a list of PDOs, in which this new PDO is included.
-4. Now P&P manager’s job is to find and load proper driver that new PDO. It issues a query to bus driver to request full hardware device ID.
+4. Now P&P manager’s job is to find and load proper driver for that new PDO. It issues a query to bus driver to request full hardware device ID.
 5. With hardware ID in hand, P&P manager looks in registry at `HKLM\System\CurrentControlSet\Enum\PCI\`. If the driver has been loaded before, it will be registered there, and P&P manager will load it. 
 6. The driver loads and creates the FDO, but adds an additional call to `IoAttachDeviceToDeviceStack`, thus attaching itself over the previous layer (typically PDO).
 
@@ -90,8 +88,7 @@ pass the request along if it’s not interesting for the driver.
 
 Once some layer calls `IoCompleteRequest`, IRP turns around and starts “climbing” back towards the originator of IRP (typically on of the Managers). 
 
-If completion routines have been
-registered, they will be invoked in reverse order of registration, such as from bottom to top.
+If completion routines have been registered, they will be invoked in reverse order of registration, such as from bottom to top.
 
 ## IPR and I/O Stack Location
 <img src="https://github.com/poipoiyo/Demo-image/blob/main/Book-Review/WindowsKernelProgramming/CH7/7-4%20Important%20fields%20of%20the%20IRP%20structure.png" width="80%" />
@@ -107,7 +104,7 @@ is asynchronous and the event was supplied. From user mode, this event can be pr
 #### 4. AssociatedIrp
 holds three members, only one of which is valid:
 - SystemBuffer: the most often used member. This points to a system-allocated non-paged pool buffer used for Buffered I/O operations. 
-- MasterIrp: A pointer to a master IRP, if this IRP is an associated IRP. This idea is supported by the I/O manager, where one IRP is a master that may have several **associated** IRPs. Once all the associated IRPs complete, the master IRP is completed automatically. MasterIrp is valid for an associated IRP 
+- MasterIrp: A pointer to a master IRP, if this IRP is an associated IRP. This idea is supported by I/O manager, where one IRP is a master that may have several **associated** IRPs. Once all associated IRPs complete, the master IRP is completed automatically. MasterIrp is valid for an associated IRP 
 - IrpCount: for the master IRP itself, this field indicates the number of associated IRPs associated with this master IRP.
 #### 5. Cancel Routine 
 Pointer to a cancel routine that is invoked if the operation
@@ -121,8 +118,7 @@ structure that knows how to describe a buffer in RAM. MdlAddress is used primari
 ### Rundown
 #### 1. MajorFunction
 Major function of the IRP (`IRP_MJ_CREATE`, `IRP_MJ_READ` ...).
-This field is sometimes useful if the driver points more than one major function code to the same handling routine. In that routine, the driver may want to distinguish the exact function
-using this field.
+This field is sometimes useful if the driver points more than one major function code to the same handling routine. In that routine, the driver may want to distinguish the exact function using this field.
 #### 2. MinorFunction
 Some IRP types have minor functions. These are `IRP_MJ_PNP`, `IRP_MJ_POWER` and `IRP_MJ_SYSTEM_CONTROL` (WMI). Typical code for these handlers has a switch statement based on the MinorFunction. 
 #### 3. FileObject 
@@ -159,8 +155,7 @@ sees the request.
 
 Normally, it’s called by requesting thread context, e.g. ReadFile in IRQL PASSIVE_LEVEL (0). 
 
-However, it’s possible that a filter driver sitting on top of this device sent the request down in a different context: it may be some other
-thread unrelated to the original requestor and even in higher IRQL.
+However, it’s possible that a filter driver sitting on top of this device sent the request down in a different context: it may be some other thread unrelated to the original requestor and even in higher IRQL.
 
 Robust drivers need to be ready to deal with this kind of situation, even though for software drivers is rare.
 
@@ -170,7 +165,7 @@ For DeviceIoControl, there is a control code in addition to potentially two buff
 2. Handle the request appropriately.
 
 ### Most common dispatch routines 
-1. `IRP_MJ_CREATE`: corresponds to  `CreateFile` or `ZwCreateFile`. This major function is essentially mandatory, otherwise no client will be able to
+1. `IRP_MJ_CREATE`: corresponds to `CreateFile` or `ZwCreateFile`. This major function is essentially mandatory, otherwise no client will be able to
 open handle to device controlled. Most drivers just complete IRP with success status.
 2. `IRP_MJ_CLOSE`: opposite of `IRP_MJ_CREATE`. Called by `CloseHandle` or `ZwClose` when the last handle to the file object is about to be closed.
 Most drivers just complete request successfully, unless something meaningful was done in `IRP_MJ_CREATE`.
@@ -183,8 +178,7 @@ Most drivers just complete request successfully, unless something meaningful was
 ## Completing a Request
 - Once driver decides to handle an IRP (not passing to another driver), it must
 eventually complete it.
-- Otherwise, the requesting thread cannot
-really terminate and by extension its containing process will linger on as well, resulting in a “zombie process”.
+- Otherwise, the requesting thread cannot really terminate and by extension its containing process will linger on as well, resulting in a “zombie process”.
 - Completing request means calling `IoCompleteRequest` after filling-in the request status and extra information. 
 - If the completion is done in the dispatch routine itself, the routine must return the same status that was placed in the IRP.
 
@@ -207,8 +201,7 @@ The value `IO_NO_INCREMENT` as defined as zero, so no increment in the above cod
 snippet.
 However, the driver may choose to give the thread a boost, regardless whether it’s the calling thread or not.
 
-In this case, the thread’s priority jumps with the given boost, and then it’s allowed to execute one quantum with that new priority before the priority decreases by one, it can then get another
-quantum with the reduced priority, and so on, until its priority returns to its original level. 
+In this case, the thread’s priority jumps with the given boost, and then it’s allowed to execute one quantum with that new priority before the priority decreases by one, it can then get another quantum with the reduced priority, and so on, until its priority returns to its original level. 
 
 <img src="https://github.com/poipoiyo/Demo-image/blob/main/Book-Review/WindowsKernelProgramming/CH7/7-6%20Thread%20priority%20boost%20and%20decay.png" width="80%" />
 
@@ -221,9 +214,7 @@ Typically, a dispatch routine is called in IRQL 0 and in the requesting thread c
 
 It’s possible for another thread in client’s process to free the passed-in buffer(s), before the driver gets a chance to examine them, and so cause an access violation.
 
-In chapter 6 use `__try / __except` block to handle any access violation by returning failure to client. (Not enough for some cases)
-
-If code is running at IRQL 2,  itcannot safely access user’s buffers at this context. 
+If code is running at IRQL 2, it cannot safely access user’s buffers at this context. 
 
 ### Issues
 1. IRQL is 2, meaning no page fault handling can occur.
@@ -277,7 +268,7 @@ DeviceObject->Flags |= DO_DIRECT_IO;
 ```
 
 ### Steps
-1. I/O Manager first makes sure  user’s buffer is valid and faults it into physical memory.
+1. I/O Manager first makes sure user’s buffer is valid and faults it into physical memory.
 2. It locks the buffer in memory, so it cannot be paged out until further notice. This solves
 page faults cannot happen, so accessing buffer in any IRQL is safe.
 3. I/O Manager builds a Memory Descriptor List (MDL) which knows how buffer mapped to RAM. Address of MDL is stored in MdlAddress field of the IRP.
@@ -302,8 +293,7 @@ address, which by definition is valid in any process context. There are two mapp
 - Most drivers specify `NormalPagePriority`, but there is also `LowPagePriority` and
 `HighPagePriority`. 
 - This priority gives hint to the system of the importance of the mapping.
-- If `MmGetSystemAddressForMdlSafe` fails, it returns NULL. This means the system is out of system
-page tables or very low on system page tables. This should
+- If `MmGetSystemAddressForMdlSafe` fails, it returns NULL. This means the system is out of system page tables or very low on system page tables. This should
 be a rare occurrence, but can happen in very low memory conditions. 
 - If NULL is returned, the driver should complete the IRP with the status `STATUS_INSUFFICIENT_RESOURCES`.
 
@@ -354,17 +344,9 @@ The driver is named `Zero` and has the following characteristics:
 - For read requests, it zeros out the provided buffer.
 - For write requests, it just consumes the provided buffer, similar to a classic null device.
 
-The driver will use Direct I/O so as not to incur the overhead of copies, as the buffers provided by
-client can potentially be very large.
+The driver will use Direct I/O so as not to incur the overhead of copies, as the buffers provided by client can potentially be very large.
 
 ## Using a Precompiled Header
-Precompiled headers is a Visual Studio feature that helps with faster compilation times. 
-
-The precompiled header is a header file that has `#include` statements for headers that rarely change, such as `ntddk.h` for drivers. 
-
-The precompiled header is compiled once, stored in internal binary format, and used in subsequent compilations, which become considerably faster.
-
-### Step
 - Add a new header file to the project and call it `pch.h`. This file will serve as the precompiled
 header. Add all rarely-changing `#includes` here:
 ```C++
@@ -457,60 +439,7 @@ NTSTATUS ZeroWrite(PDEVICE_OBJECT, PIRP Irp) {
   return CompleteIrp(Irp, STATUS_SUCCESS, len);
 }
 ```
-Don’t even calling `MmGetSystemAddressForMdlSafe`, as  don’t need to access the actual buffer. 
+Don’t even calling `MmGetSystemAddressForMdlSafe`, as don’t need to access the actual buffer. 
 
 This is also the reason this call is not made beforehand by I/O manager: the driver may not even need it, or perhaps need it in certain conditions only; so I/O manager prepares everything (the MDL) and lets the driver decide when and if to do the actual mapping.
-
-## Test Application
-```C++
-int Error(const char* msg) {
-  printf("%s: error=%d\n", msg, ::GetLastError());
-  return 1;
-}
-
-int main() {
-  HANDLE hDevice = ::CreateFile(L"\\\\.\\Zero", GENERIC_READ | GENERIC_WRITE, 0, nullptr, OPEN_EXISTING, 0, nullptr);
-  if (hDevice == INVALID_HANDLE_VALUE) {
-    return Error("failed to open device");
-  }
-
-  // test read
-  BYTE buffer[64];
-
-  // store some non-zero data
-  for (int i = 0; i < sizeof(buffer); ++i)
-    buffer[i] = i + 1;
-
-  DWORD bytes;
-  BOOL ok = ::ReadFile(hDevice, buffer, sizeof(buffer), &bytes, nullptr);
-  if (!ok)
-    return Error("failed to read");
-  if (bytes != sizeof(buffer))
-    printf("Wrong number of bytes\n");
-
-  // check if buffer data sum is zero
-  long total = 0;
-  for (auto n : buffer)
-    total += n;
-  if (total != 0)
-    printf("Wrong data\n");
-
-  // test write
-  BYTE buffer2[1024]; // contains junk
-  ok = ::WriteFile(hDevice, buffer2, sizeof(buffer2), &bytes, nullptr);
-  if (!ok)
-    return Error("failed to write");
-  if (bytes != sizeof(buffer2))
-    printf("Wrong byte count\n");
-  ::CloseHandle(hDevice);
-}
-```
-
-
-
-
-
-
-
-
 
