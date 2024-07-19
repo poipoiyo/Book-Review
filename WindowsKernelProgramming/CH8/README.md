@@ -69,9 +69,7 @@ struct ItemHeader {
 };
 ```
 
-`ItemHeader` holds information common to all event types: type and time of event and size of payload. 
-
-The size is important, as each event has its own information. 
+`ItemHeader` holds information common to all event types: type and time of event and size of payload. The size is important, as each event has its own information. 
 
 If need to pack an array of these events and provide them to user mode client, the client needs to know where each event ends and the next one begins.
 
@@ -91,34 +89,6 @@ Since need to store every structure as part of linked list, each data structure 
 
 Since these `LIST_ENTRY` objects should not be exposed to user mode, will define extended structures containing these entries in a different file, that is not shared with user mode.
 
-In SysMon.h, add a generic structure that holds `LIST_ENTRY` together with actual data structure:
-```C++
-template<typename T>
-struct FullItem {
-  LIST_ENTRY Entry;
-  T Data;
-};
-```
-
-A templated class is used to avoid creating a multitude of types, one for each specific event type.
-
-For example, create structure specifically for a process exit event:
-```C++
-struct FullProcessExitInfo {
-  LIST_ENTRY Entry;
-  ProcessExitInfo Data;
-};
-```
-
-The head of linked list must be stored somewhere. Create a data structure that will hold all global state of driver, instead of creating separate global variables. 
-
-```C++
-struct Globals {
-  LIST_ENTRY ItemsHead;
-  int ItemCount;
-  FastMutex Mutex;
-};
-```
 ## Handling Process Exit Notifications
 The process notification function in code above is `OnProcessNotify` and has the prototype outlined earlier. 
 
@@ -154,8 +124,7 @@ The driver should never let data be consumed without limit.
 
 If the item count is above limit, the code removes the oldest item, essentially treating the linked list as a queue (`RemoveHeadList`). 
 
-If the item is removed, its memory must be freed. The pointer to
-the actual entry is not necessarily the pointer that was originally allocated (in this case it actually is because the `LIST_ENTRY` object is the first in `FullItem<>`), so `CONTAINING_RECORD` macro is used to get to the beginning of `FullItem<>` object. 
+If the item is removed, its memory must be freed. The pointer to the actual entry is not necessarily the pointer that was originally allocated (in this case it actually is because the `LIST_ENTRY` object is the first in `FullItem<>`), so `CONTAINING_RECORD` macro is used to get to the beginning of `FullItem<>` object. 
 
 <img src="https://github.com/poipoiyo/Demo-image/blob/main/Book-Review/WindowsKernelProgramming/CH8/8-2%20FullItem%20layout.png" width="80%" />
 
