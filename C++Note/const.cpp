@@ -53,12 +53,6 @@ private:
 
 std::size_t CTestBlock::length() const
 {
-    textLength = std::strlen(pText); // error!
-    return textLength;
-}
-
-std::size_t CTestBlock::length() const
-{
     textLength = std::strlen(pText); // ok!
     return textLength;
 }
